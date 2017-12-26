@@ -239,7 +239,7 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
         for i in range(1, len(labels)):
             indices.append(i)
             closes.append(closes[-1] * (1 + labels[i]))
-            assets.append(assets[-1] * (1 + cr[i]))
+            assets.append(assets[-1] * (1 + labels[i] * pred[i]))
         plt.plot(indices, closes)
         plt.plot(indices, assets)
         plt.show()
@@ -302,7 +302,7 @@ def main(operation='train', code=None):
         trader.build_graph()
         train(trader, train_set, val_set, train_steps, batch_size=batch_size, keep_rate=keep_rate)
     elif operation == "predict":
-        predict_file_path = "./dataset/000001.csv"
+        predict_file_path = "./dataset/daily_data.csv"
         if code is not None:
             predict_file_path = "./dataset/%s.csv" % code
         print("processing file %s" % predict_file_path)
@@ -325,7 +325,7 @@ def main(operation='train', code=None):
 if __name__ == '__main__':
     tf.set_random_seed(2)
     seed(1)
-    operation = 'train'
+    operation = 'predict'
     code = None
     if len(sys.argv) > 1:
         operation = sys.argv[1]
