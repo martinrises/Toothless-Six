@@ -184,7 +184,7 @@ def train(trader, train_set, val_set, train_steps=10000, batch_size=32, keep_rat
                 [trader.optimizer, trader.loss, trader.avg_position, trader.summary_op],
                 feed_dict={trader.x: batch_features, trader.y: batch_labels,
                            trader.is_training: True, trader.keep_rate: keep_rate})
-            writer.add_summary(summary, global_step=i)
+            writer.add_summary(summary, global_step=trader.global_step.eval(sess))
             if i % VERBOSE_STEP == 0:
                 hint = None
                 if i % VALIDATION_STEP == 0:
@@ -240,12 +240,15 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
         std_asset = 1
         assets = [std_asset]
         indices = [0]
+        preds = [0]
         for i in range(1, len(labels)):
             indices.append(i)
             closes.append(closes[-1] * (1 + labels[i]))
             assets.append(assets[-1] * (1 + labels[i] * pred[i]))
+            preds.append(pred[i] + 1)
         plt.plot(indices, closes)
         plt.plot(indices, assets)
+        plt.plot(indices, preds)
         plt.show()
 
 
