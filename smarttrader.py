@@ -274,7 +274,7 @@ def main(operation='train', code=None):
     hidden_size = 14
     nclasses = 1
     validation_size = 700
-    keep_rate = 0.7
+    keep_rate = 0.5
 
     selector = ["ROCP", "OROCP", "HROCP", "LROCP", "MACD", "RSI", "VROCP", "BOLL", "MA", "VMA", "PRICE_VOLUME"]
     input_shape = [30, 61]  # [length of time series, length of feature]
