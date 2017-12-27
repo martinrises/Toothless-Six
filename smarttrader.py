@@ -213,6 +213,13 @@ def calculate_cumulative_return(labels, pred):
     return cr
 
 
+def get_ma_preds(preds, preiod):
+    result = [preds[0]]
+    for i in range(1, len(preds)):
+        result.append(result[-1] * (preiod - 1) / preiod + preds[i]/preiod)
+    return result
+
+
 def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8, nclasses=1):
     features = val_set.images
     labels = val_set.labels
@@ -240,7 +247,7 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
         std_asset = 1
         assets = [std_asset]
         indices = [0]
-        preds = [0]
+        preds = [1]
         for i in range(1, len(labels)):
             indices.append(i)
             closes.append(closes[-1] * (1 + labels[i]))
@@ -249,6 +256,9 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
         plt.plot(indices, closes)
         plt.plot(indices, assets)
         plt.plot(indices, preds)
+
+        ma_preds = get_ma_preds(preds, 5)
+        plt.plot(indices, ma_preds)
         plt.show()
 
 
