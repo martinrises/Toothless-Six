@@ -260,7 +260,7 @@ def main(operation='train', code=None):
     input_shape = [30, 61]  # [length of time series, length of feature]
 
     if operation == 'train':
-        dataset_dir = "./dataset"
+        dataset_dir = "./dataset/debug/"
         train_features = []
         train_labels = []
         val_features = []
@@ -269,7 +269,7 @@ def main(operation='train', code=None):
             # if filename != '000001.csv':
             #    continue
             print("processing file: " + filename)
-            filepath = dataset_dir + "/" + filename
+            filepath = os.path.join(dataset_dir, filename)
             raw_data = read_sample_data(filepath)
             moving_features, moving_labels = extract_feature(raw_data=raw_data, selector=selector,
                                                              window=input_shape[0],
@@ -325,7 +325,7 @@ def main(operation='train', code=None):
 if __name__ == '__main__':
     tf.set_random_seed(2)
     seed(1)
-    operation = 'predict'
+    operation = 'train'
     code = None
     if len(sys.argv) > 1:
         operation = sys.argv[1]
