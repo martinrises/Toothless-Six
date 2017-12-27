@@ -132,7 +132,7 @@ class SmartTrader(object):
         norm_signal = self.batch_norm_layer(signal, scope=scope)
         # batch_norm(signal, 0.9, center=True, scale=True, epsilon=0.001, activation_fn=tf.nn.relu6,
         #           is_training=is_training, scope="activation_batch_norm", reuse=False)
-        self.position = (tf.nn.relu6(norm_signal, name="relu_limit") - 3) / 6.
+        self.position = (tf.nn.relu6(norm_signal, name="relu_limit") - 3) / 3.
         self.avg_position = tf.reduce_mean(self.position)
         # self.cost = 0.0002
         self.loss = -100. * tf.reduce_mean(tf.multiply((self.y - self.cost), self.position, name="estimated_risk"))
