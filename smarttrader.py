@@ -187,12 +187,13 @@ def train(trader, train_set, val_set, train_steps=10000, batch_size=32, keep_rat
                            trader.is_training: True, trader.keep_rate: keep_rate})
             writer.add_summary(summary, global_step=step)
             if i % VERBOSE_STEP == 0:
+                val_loss, val_avg_pos, val_summary = sess.run([trader.loss, trader.avg_position, trader.summary_op],
+                                                              feed_dict={trader.x: val_features, trader.y: val_labels,
+                                                                         trader.is_training: False,
+                                                                         trader.keep_rate: 1.})
+                val_writer.add_summary(val_summary, global_step=step)
                 hint = None
                 if i % VALIDATION_STEP == 0:
-                    val_loss, val_avg_pos, val_summary = sess.run([trader.loss, trader.avg_position, trader.summary_op],
-                                                     feed_dict={trader.x: val_features, trader.y: val_labels,
-                                                                trader.is_training: False, trader.keep_rate: 1.})
-                    val_writer.add_summary(val_summary, global_step=step)
                     hint = 'Average Train Loss at step {}: {:.7f} Average position {:.7f}, Validation Loss: {:.7f} Average Position: {:.7f}'.format(
                         step, loss, avg_pos, val_loss, val_avg_pos)
                     if val_loss < min_validation_loss:
@@ -218,7 +219,7 @@ def calculate_cumulative_return(labels, pred):
 def get_ma_preds(preds, preiod):
     result = [preds[0]]
     for i in range(1, len(preds)):
-        result.append(result[-1] * (preiod - 1) / preiod + preds[i]/preiod)
+        result.append(result[-1] * (preiod - 1) / preiod + preds[i] / preiod)
     return result
 
 
