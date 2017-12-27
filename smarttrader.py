@@ -172,7 +172,11 @@ def train(trader, train_set, val_set, train_steps=10000, batch_size=32, keep_rat
     saver = tf.train.Saver()
     min_validation_loss = 100000000.
     with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
+        ckpt = tf.train.get_checkpoint_state(os.path.dirname('checkpoint/checkpoint'))
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+        else:
+            sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter("./graphs", sess.graph)
         for i in range(initial_step, initial_step + train_steps):
             batch_features, batch_labels = train_set.next_batch(batch_size)
@@ -302,7 +306,7 @@ def main(operation='train', code=None):
         trader.build_graph()
         train(trader, train_set, val_set, train_steps, batch_size=batch_size, keep_rate=keep_rate)
     elif operation == "predict":
-        predict_file_path = "./dataset/daily_data.csv"
+        predict_file_path = "./dataset/000001.csv"
         if code is not None:
             predict_file_path = "./dataset/%s.csv" % code
         print("processing file %s" % predict_file_path)
