@@ -266,18 +266,18 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
 
 
 def main(operation='train', code=None):
-    step = 30
+    step = 60
     input_size = 61
     train_steps = 1000000
     batch_size = 512
     learning_rate = 0.001
     hidden_size = 14
     nclasses = 1
-    validation_size = 700
+    validation_size = 100
     keep_rate = 0.5
 
     selector = ["ROCP", "OROCP", "HROCP", "LROCP", "MACD", "RSI", "VROCP", "BOLL", "MA", "VMA", "PRICE_VOLUME"]
-    input_shape = [30, 61]  # [length of time series, length of feature]
+    input_shape = [step, input_size]  # [length of time series, length of feature]
 
     if operation == 'train':
         dataset_dir = "./dataset/debug/"
