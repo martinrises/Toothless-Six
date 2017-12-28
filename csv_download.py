@@ -10,7 +10,8 @@ def save_csv(filename, content_str):
         f.write(content_str)
 
 def download():
-    file_list = os.listdir('./dataset/debug/')
+    path = './dataset/debug'
+    file_list = os.listdir(path)
     for index in data_indices:
         if '{}.csv'.format(index) in file_list:
             continue
@@ -36,6 +37,15 @@ def download():
         except:
             print('timeout')
             continue
+
+    file_list = os.listdir(path)
+    for f in file_list:
+        file_path = os.path.join(path, f)
+        with open(file_path, 'r') as fil:
+            lines = fil.readlines()
+            if len(lines) < 100:
+                os.remove(file_path)
+                print('remove {}, {}'.format(f, len(lines)))
     print('Done')
 
 
