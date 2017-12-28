@@ -28,6 +28,7 @@ from tensorflow.contrib.layers.python.layers.layers import batch_norm
 import sys
 from numpy.random import seed
 import matplotlib.pyplot as plt
+import random
 
 
 class SmartTrader(object):
@@ -266,61 +267,34 @@ def predict(val_set, step=30, input_size=61, learning_rate=0.001, hidden_size=8,
 
 
 def main(operation='train', code=None):
-    step = 60
+    step = 30
     input_size = 61
-    train_steps = 1000000
+    train_epoch = 100000
+    train_steps = 1000
     batch_size = 512
     learning_rate = 0.001
     hidden_size = 14
     nclasses = 1
     validation_size = 100
-    keep_rate = 0.5
+    keep_rate = 0.7
 
     selector = ["ROCP", "OROCP", "HROCP", "LROCP", "MACD", "RSI", "VROCP", "BOLL", "MA", "VMA", "PRICE_VOLUME"]
     input_shape = [step, input_size]  # [length of time series, length of feature]
 
     if operation == 'train':
-        dataset_dir = "./dataset/debug/"
-        train_features = []
-        train_labels = []
-        val_features = []
-        val_labels = []
-        for filename in os.listdir(dataset_dir):
-            # if filename != '000001.csv':
-            #    continue
-            print("processing file: " + filename)
-            filepath = os.path.join(dataset_dir, filename)
-            raw_data = read_sample_data(filepath)
-            moving_features, moving_labels = extract_feature(raw_data=raw_data, selector=selector,
-                                                             window=input_shape[0],
-                                                             with_label=True, flatten=False)
-            train_features.extend(moving_features[:-validation_size])
-            train_labels.extend(moving_labels[:-validation_size])
-            val_features.extend(moving_features[-validation_size:])
-            val_labels.extend(moving_labels[-validation_size:])
-
-        train_features = numpy.transpose(numpy.asarray(train_features), [0, 2, 1])
-        train_labels = numpy.asarray(train_labels)
-        train_labels = numpy.reshape(train_labels, [train_labels.shape[0], 1])
-        val_features = numpy.transpose(numpy.asarray(val_features), [0, 2, 1])
-        val_labels = numpy.asarray(val_labels)
-        val_labels = numpy.reshape(val_labels, [val_labels.shape[0], 1])
-        train_set = DataSet(train_features, train_labels)
-        val_set = DataSet(val_features, val_labels)
-
-        # raw_data = read_sample_data("toy_stock.csv")
-        # moving_features, moving_labels = extract_feature(raw_data=raw_data, selector=selector, window=input_shape[0],
-        #                                                 with_label=True, flatten=False)
-        # moving_features = numpy.asarray(moving_features)
-        # moving_features = numpy.transpose(moving_features, [0, 2, 1])
-        # moving_labels = numpy.asarray(moving_labels)
-        # moving_labels = numpy.reshape(moving_labels, [moving_labels.shape[0], 1])
-        # train_set = DataSet(moving_features[:-validation_size], moving_labels[:-validation_size])
-        # val_set = DataSet(moving_features[-validation_size:], moving_labels[-validation_size:])
-
         trader = SmartTrader(step, input_size, learning_rate, hidden_size, nclasses)
         trader.build_graph()
-        train(trader, train_set, val_set, train_steps, batch_size=batch_size, keep_rate=keep_rate)
+        dataset_dir = "./dataset/debug/"
+        for i in range(train_epoch):
+            print('shuffle training data')
+            dir_list = os.listdir(dataset_dir)
+            random.shuffle(dir_list)
+            random.shuffle(dir_list)
+            random.shuffle(dir_list)
+            random.shuffle(dir_list)
+            random.shuffle(dir_list)
+            train_with_shuffled_dataset(trader, batch_size, dataset_dir, dir_list[0:10], hidden_size, input_shape, input_size, keep_rate,
+                                        learning_rate, nclasses, selector, step, train_steps, validation_size)
     elif operation == "predict":
         predict_file_path = "./dataset/000001.csv"
         if code is not None:
@@ -340,6 +314,45 @@ def main(operation='train', code=None):
 
     else:
         print("Operation not supported. ")
+
+
+def train_with_shuffled_dataset(trader, batch_size, dataset_dir, dir_list, hidden_size, input_shape, input_size, keep_rate,
+                                learning_rate, nclasses, selector, step, train_steps, validation_size):
+    train_features = []
+    train_labels = []
+    val_features = []
+    val_labels = []
+    for filename in dir_list:
+        # if filename != '000001.csv':
+        #    continue
+        print("processing file: " + filename)
+        filepath = os.path.join(dataset_dir, filename)
+        raw_data = read_sample_data(filepath)
+        moving_features, moving_labels = extract_feature(raw_data=raw_data, selector=selector,
+                                                         window=input_shape[0],
+                                                         with_label=True, flatten=False)
+        train_features.extend(moving_features[:-validation_size])
+        train_labels.extend(moving_labels[:-validation_size])
+        val_features.extend(moving_features[-validation_size:])
+        val_labels.extend(moving_labels[-validation_size:])
+    train_features = numpy.transpose(numpy.asarray(train_features), [0, 2, 1])
+    train_labels = numpy.asarray(train_labels)
+    train_labels = numpy.reshape(train_labels, [train_labels.shape[0], 1])
+    val_features = numpy.transpose(numpy.asarray(val_features), [0, 2, 1])
+    val_labels = numpy.asarray(val_labels)
+    val_labels = numpy.reshape(val_labels, [val_labels.shape[0], 1])
+    train_set = DataSet(train_features, train_labels)
+    val_set = DataSet(val_features, val_labels)
+    # raw_data = read_sample_data("toy_stock.csv")
+    # moving_features, moving_labels = extract_feature(raw_data=raw_data, selector=selector, window=input_shape[0],
+    #                                                 with_label=True, flatten=False)
+    # moving_features = numpy.asarray(moving_features)
+    # moving_features = numpy.transpose(moving_features, [0, 2, 1])
+    # moving_labels = numpy.asarray(moving_labels)
+    # moving_labels = numpy.reshape(moving_labels, [moving_labels.shape[0], 1])
+    # train_set = DataSet(moving_features[:-validation_size], moving_labels[:-validation_size])
+    # val_set = DataSet(moving_features[-validation_size:], moving_labels[-validation_size:])
+    train(trader, train_set, val_set, train_steps, batch_size=batch_size, keep_rate=keep_rate)
 
 
 if __name__ == '__main__':
